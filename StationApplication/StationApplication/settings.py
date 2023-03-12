@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'stationdb',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': '123456789',
         # 'HOST': '127.0.0.2',
         # 'PORT': '0210',
     }
