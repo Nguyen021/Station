@@ -26,44 +26,6 @@ class Station(BaseModel):
         return self.name
 
 
-# class TransportCompany(models.Model):
-#     name = models.CharField(max_length=255)
-#     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-#     status = models.BooleanField(default=False)
-#
-#     def __str__(self):
-#         return self.name
-#
-# class Route(models.Model):
-#     transport_company = models.ForeignKey(TransportCompany, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=255)
-#     start_location = models.CharField(max_length=255)
-#     end_location = models.CharField(max_length=255)
-#
-#     def __str__(self):
-#         return self.name
-#
-# class Trip(models.Model):
-#     route = models.ForeignKey(Route, on_delete=models.CASCADE)
-#     start_time = models.DateTimeField()
-#     end_time = models.DateTimeField()
-#     price = models.DecimalField(max_digits=10, decimal_places=2)
-#
-#     def __str__(self):
-#         return f'{self.route.name} - {self.start_time.strftime("%d/%m/%Y %H:%M")}'
-#
-#
-# class Ticket(models.Model):
-#     trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     quantity = models.IntegerField(default=1)
-#     is_paid_online = models.BooleanField(default=False)
-#     is_paid_offline = models.BooleanField(default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#
-#     def __str__(self):
-#         return f'{self.user.username} - {self.trip.route.name} - {self.created_at.strftime("%d/%m/%Y %H:%M")}'
-
 class Route(BaseModel):
     station = models.ForeignKey(Station, on_delete=models.CASCADE)
     start_point = models.CharField(max_length=255)
@@ -74,16 +36,29 @@ class Route(BaseModel):
     def __str__(self):
         return self.name
 
+
+class Bus(BaseModel):
+    license = models.CharField(max_length=10, unique=True)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='bus_station')
+    driver = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.license} - {self.driver}'
+
+
 class Trip(BaseModel):
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     price = models.FloatField()
     available_seats = models.IntegerField()
+    image = models.ImageField(upload_to='users/%Y/%m', null=True)
 
     def __str__(self):
         return f'{self.route.name} - {self.start_time.strftime("%d/%m/%Y %H:%M")}'
+
 
 class Booking(BaseModel):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
