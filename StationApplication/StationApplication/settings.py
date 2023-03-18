@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'stationdb',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': '123456789',
         # 'HOST': '127.0.0.2',
         # 'PORT': '0210',
     }
@@ -143,3 +143,6 @@ REST_FRAMEWORK = {
 
 CLIENT_ID = 'm1Zxb9zXer91FIRCRRFBSQfHaQ2ilECnGIlTe0Tp'
 CLIENT_SECRET = 'tN0LJ9QN0J1ppmKdF0RAcefXjasV5Dpi7HK47W0XMJINEXvYAUMIfOUPE4YYGsiUW5u6ZiNtnnsnMgSWgSWpFZeliC0u4cUhO2LuLmmRavoyxEyzcEmZxAnFWZ9C7jar'
+
+
+#token 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
