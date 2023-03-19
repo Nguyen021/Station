@@ -8,7 +8,7 @@ class UserSerializer(ModelSerializer):
     def get_image(self, user):
         if user.avatar:
             request = self.context.get('request')
-            return request.build_absolute_uri('static/%s' % user.avatar.name) if request else ''
+            return request.build_absolute_uri('/static/%s' % user.avatar.name) if request else ''
 
     def create(self, validated_data):
         data = validated_data.copy()
@@ -42,6 +42,7 @@ class BusSerializer(ModelSerializer):
     class Meta:
         model = Bus
         fields = ['id', 'license', 'station', 'driver']
+
 
 
 class ImageSerializer(ModelSerializer):
