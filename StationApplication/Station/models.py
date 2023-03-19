@@ -34,7 +34,7 @@ class Route(BaseModel):
     duration = models.FloatField()
 
     def __str__(self):
-        return self.name
+        return f'{self.start_point} - {self.end_point}'
 
 
 class Bus(BaseModel):
@@ -54,7 +54,7 @@ class Trip(BaseModel):
     end_time = models.DateTimeField()
     price = models.FloatField()
     available_seats = models.IntegerField()
-    image = models.ImageField(upload_to='users/%Y/%m', null=True)
+    image = models.ImageField(upload_to='trip/%Y/%m', null=True)
 
     def __str__(self):
         return f'{self.route.name} - {self.start_time.strftime("%d/%m/%Y %H:%M")}'

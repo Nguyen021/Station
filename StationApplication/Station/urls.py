@@ -7,6 +7,7 @@ routers = routers.DefaultRouter()
 routers.register('users',UserViewSet)
 routers.register('station',StationViewSet)
 routers.register('route',RouteViewSet)
+routers.register('bus',BusViewSet)
 urlpatterns = [
     path('', include(routers.urls)),
     # path('', index, name='index'),
