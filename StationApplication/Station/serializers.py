@@ -1,9 +1,9 @@
-from .models import User, Station, Route, Bus
+from .models import User, Station, Route, Bus, Trip, Delivery
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
 class UserSerializer(ModelSerializer):
-    image = SerializerMethodField(source='avatar')
+    image = SerializerMethodField(source='image')
 
     def get_image(self, user):
         if user.avatar:
@@ -27,6 +27,8 @@ class UserSerializer(ModelSerializer):
 
 
 class StationSerializer(ModelSerializer):
+    user = UserSerializer
+
     class Meta:
         model = Station
         fields = ['id', 'name', 'address', 'user']
@@ -43,6 +45,25 @@ class BusSerializer(ModelSerializer):
         model = Bus
         fields = ['id', 'license', 'station', 'driver']
 
+
+class TripSerializer(ModelSerializer):
+    bus = BusSerializer
+    route = RouteSerializer
+    station = StationSerializer
+
+    class Meta:
+        model = Trip
+        fields = ['id', 'start_time', 'end_time', 'price', 'image', 'bus', 'station', 'route']
+
+
+class DeliverySerializer(ModelSerializer):
+    station = StationSerializer
+
+    class Meta:
+        model = Delivery
+        fields = ['id', 'sender_name', 'sender_address', 'sender_phone',
+                  'receiver_name', 'receiver_address', 'receiver_phone',
+                  'weight', 'station']
 
 
 class ImageSerializer(ModelSerializer):

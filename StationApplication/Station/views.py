@@ -3,15 +3,15 @@ from rest_framework import viewsets, parsers, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import User, Station, Route, Bus
-from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer
+from .models import User, Station, Route, Bus, Trip, Delivery
+from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, DeliverySerializer
 
 
 def index(request):
     return HttpResponse("My Application for Station")
 
 
-class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
+class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserSerializer
     parser_classes = [parsers.MultiPartParser, ]
@@ -33,7 +33,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         return Response(UserSerializer(u, context={'request': request}).data)
 
 
-class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = Station.objects.filter(active=True)
     serializer_class = StationSerializer
 
@@ -61,19 +61,12 @@ class BusViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrieve
     queryset = Bus.objects.filter(active=True)
     serializer_class = BusSerializer
 
-    # @api_view(['GET', 'POST'])
-    # def nha_xe_list(request):
-    #     """
-    #     List all NhaXe, or create a new NhaXe.
-    #     """
-    #     if request.method == 'GET':
-    #         station = Station.objects.all()
-    #         serializer = StationSerializer(station , many=True)
-    #         return Response(serializer.data)
-    #
-    #     elif request.method == 'POST':
-    #         serializer = StationSerializer(data=request.data)
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #             return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+    queryset = Trip.objects.filter(active=True)
+    serializer_class = TripSerializer
+
+
+class DeliveryViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+    queryset = Delivery.objects.filter(active=True)
+    serializer_class = DeliverySerializer

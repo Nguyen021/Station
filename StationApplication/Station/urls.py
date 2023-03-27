@@ -8,6 +8,8 @@ routers.register('users',UserViewSet)
 routers.register('station',StationViewSet)
 routers.register('route',RouteViewSet)
 routers.register('bus',BusViewSet)
+routers.register('trip', TripViewSet)
+routers.register('delivery', DeliveryViewSet)
 urlpatterns = [
     path('', include(routers.urls)),
     # path('', index, name='index'),

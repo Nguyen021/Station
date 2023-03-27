@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
 
+    'drf_yasg',
+
 ]
 
 MIDDLEWARE = [
@@ -87,7 +89,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'stationdb',
         'USER': 'root',
-        'PASSWORD': '123456789',
+        'PASSWORD': '12345678',
         # 'HOST': '127.0.0.2',
         # 'PORT': '0210',
     }
