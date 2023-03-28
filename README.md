@@ -5,9 +5,9 @@
 
 ### 1. Fork to create your own copy of the repository
 
-**Step 1**: Login to [GitHub](https://github.com) and navigate to [this repository](https://github.com/Nguyen021/web-apis-with-python.git)
+**Step 1**: Login to [GitHub](https://github.com) and navigate to [this repository] (https://github.com/Nguyen021/web-apis-with-python.git)
 
-```http
+```link
 https://github.com/Nguyen021/web-apis-with-python.git
 ```
 
