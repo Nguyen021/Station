@@ -18,6 +18,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
 from django.urls import path, include, re_path
+from .views import login
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -38,5 +39,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('o/', include('oauth2_provider.urls',
                        namespace='oauth2_provider')),
-
+    path('login/', login, name='login'),
 ]

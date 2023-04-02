@@ -1,9 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.core.validators import RegexValidator
 
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='users/%Y/%m', null=True)
+    phone_regex = RegexValidator(regex=r'^\+?(?:84|0)(\d{9,10})$',
+                                 message="Số điện thoại không hợp lệ.")
+    phone_number = models.CharField(validators=[phone_regex], max_length=12, null=True)  # Validators should be a list
 
 
 # Create your models here.

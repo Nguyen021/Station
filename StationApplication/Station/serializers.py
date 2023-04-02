@@ -4,7 +4,6 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 class UserSerializer(ModelSerializer):
     image = SerializerMethodField(source='image')
-
     def get_image(self, user):
         if user.avatar:
             request = self.context.get('request')
@@ -19,7 +18,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'avatar', 'image']
+        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'image', 'email', 'phone_number']
         extra_kwargs = {
             'password': {'write_only': True},
             'avatar': {'write_only': True}
@@ -57,13 +56,13 @@ class TripSerializer(ModelSerializer):
 
 
 class DeliverySerializer(ModelSerializer):
-    station = StationSerializer
+    trip = Trip
 
     class Meta:
         model = Delivery
         fields = ['id', 'sender_name', 'sender_address', 'sender_phone',
                   'receiver_name', 'receiver_address', 'receiver_phone',
-                  'weight', 'station']
+                  'weight', 'trip']
 
 
 class ImageSerializer(ModelSerializer):

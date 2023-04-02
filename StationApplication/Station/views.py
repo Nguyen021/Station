@@ -4,7 +4,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import User, Station, Route, Bus, Trip, Delivery
-from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, DeliverySerializer
+from .pagination import StandardResultsSetPagination
+from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, \
+    DeliverySerializer
 
 
 def index(request):
@@ -36,6 +38,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
 class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = Station.objects.filter(active=True)
     serializer_class = StationSerializer
+    pagination_class = StandardResultsSetPagination
 
     @action(methods=['get'], detail=True, url_path='routes')
     def routes(self, request, pk):
@@ -55,18 +58,22 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 class RouteViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Route.objects.filter(active=True)
     serializer_class = RouteSerializer
+    pagination_class = StandardResultsSetPagination
 
 
 class BusViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Bus.objects.filter(active=True)
     serializer_class = BusSerializer
+    pagination_class = StandardResultsSetPagination
 
 
 class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Trip.objects.filter(active=True)
     serializer_class = TripSerializer
+    pagination_class = StandardResultsSetPagination
 
 
 class DeliveryViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Delivery.objects.filter(active=True)
     serializer_class = DeliverySerializer
+    pagination_class = StandardResultsSetPagination
