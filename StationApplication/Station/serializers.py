@@ -56,7 +56,7 @@ class TripSerializer(ModelSerializer):
 
 
 class DeliverySerializer(ModelSerializer):
-    trip = Trip
+    trip = TripSerializer
 
     class Meta:
         model = Delivery
