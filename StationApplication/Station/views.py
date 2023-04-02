@@ -45,7 +45,7 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
         return Response(RouteSerializer(routes, many=True, context={'request': request}).data)
 
     @action(methods=['get'], detail=True, url_path='bus')
-    def routes(self, request, pk):
+    def bus(self, request, pk):
         c = self.get_object()  # Course.query.get(pk=pk)
         bus = c.bus_station.filter(active=True)
 

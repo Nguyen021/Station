@@ -21,11 +21,11 @@ from django.urls import path, include, re_path
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Course API",
+        title="Station management API",
         default_version='v1',
-        description="APIs for CourseApp",
-        contact=openapi.Contact(email="thanh.dh@ou.edu.vn"),
-        license=openapi.License(name="Dương Hữu Thành@2021"),
+        description="Station management app",
+        contact=openapi.Contact(url='https://github.com/Nguyen021/Station', name="Hà Trường Nguyên - Dương Trung Nguyên"),
+        license=openapi.License(name="My Team©2023"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
