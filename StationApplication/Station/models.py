@@ -54,6 +54,7 @@ class Trip(BaseModel):
     price = models.FloatField()
     available_seats = models.IntegerField()
     image = models.ImageField(upload_to='trip/%Y/%m', null=True)
+    total_seats = models.IntegerField(default=0);
 
     def __str__(self):
         return f'{self.route.name} - {self.start_time.strftime("%d/%m/%Y %H:%M")}'
@@ -81,7 +82,7 @@ class Booking(BaseModel):
 
 class Delivery(BaseModel):
     name = models.CharField(max_length=255)
-    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='deliveries_received')
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
     sender_name = models.CharField(max_length=255)
     sender_address = models.CharField(max_length=255)
     sender_phone = models.CharField(max_length=20)
@@ -90,6 +91,8 @@ class Delivery(BaseModel):
     receiver_phone = models.CharField(max_length=20)
     weight = models.FloatField()
     delivery_time = models.DateTimeField()
+    price_of_goods = models.FloatField()
+    price_of_ship = models.FloatField()
 
     def __str__(self):
         return f'{self.name}  - {self.sender_name} - {self.sender_address} - {self.sender_phone} - {self.receiver_name} - {self.receiver_address} - {self.receiver_phone}'
