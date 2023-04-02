@@ -82,17 +82,17 @@ class Booking(BaseModel):
 
 class Delivery(BaseModel):
     name = models.CharField(max_length=255)
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, null=True)
     sender_name = models.CharField(max_length=255)
     sender_address = models.CharField(max_length=255)
     sender_phone = models.CharField(max_length=20)
     receiver_name = models.CharField(max_length=255)
     receiver_address = models.CharField(max_length=255)
     receiver_phone = models.CharField(max_length=20)
-    weight = models.FloatField()
-    delivery_time = models.DateTimeField()
-    price_of_goods = models.FloatField()
-    price_of_ship = models.FloatField()
+    weight = models.FloatField(null=True)
+    delivery_time = models.DateTimeField(null=True)
+    price_of_goods = models.FloatField(null=True)
+    price_of_ship = models.FloatField(null=True)
 
     def __str__(self):
         return f'{self.name}  - {self.sender_name} - {self.sender_address} - {self.sender_phone} - {self.receiver_name} - {self.receiver_address} - {self.receiver_phone}'
