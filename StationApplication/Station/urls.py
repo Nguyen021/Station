@@ -1,18 +1,14 @@
 from django.urls import path, include
 from .views import *
-from rest_framework import routers
+from rest_framework.routers import DefaultRouter
 
-
-routers = routers.DefaultRouter()
-routers.register('users',UserViewSet)
-routers.register('station',StationViewSet)
-routers.register('route',RouteViewSet)
-routers.register('bus',BusViewSet)
-routers.register('trip', TripViewSet)
-routers.register('delivery', DeliveryViewSet)
+route = DefaultRouter()
+route.register('users', UserViewSet)
+route.register('station', StationViewSet)
+route.register('route', RouteViewSet)
+route.register('bus', BusViewSet)
+route.register('trip', TripViewSet)
+route.register('delivery', DeliveryViewSet)
 urlpatterns = [
-    path('', include(routers.urls)),
-    # path('', index, name='index'),
-    # path('nhaxe/', nha_xe_list),
-    # path('nhaxe/<int:pk>/', views.nha_xe_detail),
+    path('', include(route.urls)),
 ]

@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'Station.apps.StationConfig',
     'rest_framework',
     'oauth2_provider',
-
     'drf_yasg',
+    'corsheaders',
 
 ]
 
@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = 'StationApplication.urls'
@@ -75,23 +76,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'StationApplication.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'stationdb',
+        'NAME': 'station_db',
         'USER': 'root',
-        'PASSWORD': '123456789',
-        # 'HOST': '127.0.0.2',
-        # 'PORT': '0210',
+        'PASSWORD': '12345678',
     }
 }
 
@@ -124,6 +114,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CORS_ORIGIN_ALLOW_ALL = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -148,9 +139,16 @@ REST_FRAMEWORK = {
 # CLIENT_ID = 'm1Zxb9zXer91FIRCRRFBSQfHaQ2ilECnGIlTe0Tp'
 # CLIENT_SECRET = 'tN0LJ9QN0J1ppmKdF0RAcefXjasV5Dpi7HK47W0XMJINEXvYAUMIfOUPE4YYGsiUW5u6ZiNtnnsnMgSWgSWpFZeliC0u4cUhO2LuLmmRavoyxEyzcEmZxAnFWZ9C7jar'
 
-CLIENT_ID = 'lkSaQQgpQPv3cJ9U8PsvTRW4yKetr1EJmiTs03ht'
-CLIENT_SECRET = 'hq36b1E9xtDzuDw73WaurGzhmdNAPoptErHjzWCSuPNtGrads6iTkKapS6Em6UUg2gKFtuQTvFkDGdYGJvd4jcteawZusTZDFZnyda2YZpM1zFtP36tUAGLoALfkiniN'
+CLIENT_ID = '6BQTBv2ItokdVwqqsOX5XhP4g03X5uNMJyjfKkNg'
+CLIENT_SECRET = 'qC0IwGTqHTJObUqLVQ8wtVA0Pd9yX6v0V5Bt6KorOixsmSyHH46Mw6TYHIYGVUEJ6B3Z8oqJD6r8Mt8JE3GnSdYpcAz5klrxRcgiaRZ9mOfOhQCO1T3Bc9B5d0KB2W7V'
 GRANT_TYPE = 'password'
 
 APPEND_SLASH = False
-# token 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
+
+
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    # 'SCOPES': {'read': 'Read scope', 'write': 'Write scope'},
+    # 'OAUTH2_VALIDATOR_CLASS': 'external.validators.EmailOAuth2Validator', # Self over ride : To use email as username to get access tokens
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore'
+}

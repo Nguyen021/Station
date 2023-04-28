@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
+
 class Oauth2Backend(BaseBackend):
     def authenticate(self, request, client_id=None, client_secret=None, grant_type=None, **kwargs):
         User = get_user_model()
