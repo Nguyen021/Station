@@ -142,3 +142,23 @@ class ImageSerializer(ModelSerializer):
         if obj.image:
             request = self.context.get('request')
             return request.build_absolute_uri('/static/%s' % obj.image.name) if request else ''
+
+
+class ListStationSerializer(ModelSerializer):
+    user = SerializerMethodField()
+
+    def get_user(self, station):
+        user = station.user
+        if user:
+            return {
+                'id': user.id,
+                'username': user.username,
+                'firstname': user.first_name,
+                'lastname': user.last_name,
+                'email': user.email
+            }
+        return None
+
+    class Meta:
+        model = Station
+        fields = ['id', 'name', 'address', 'user', 'active']

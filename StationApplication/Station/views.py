@@ -1,6 +1,7 @@
 import datetime
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, Http404
+from django.views import View
 from rest_framework import viewsets, parsers, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,11 +10,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.core.paginator import Paginator
 from django.db import transaction
+from datetime import datetime as date
+from rest_framework.permissions import IsAuthenticated
 
 from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment, Rating
 from .pagination import StandardResultsSetPagination
 from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, \
-    DeliverySerializer, BookingSerializer, CommentSerializer
+    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer
 
 
 def index(request):
@@ -99,6 +102,8 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
         r.save()
 
         return Response(status=status.HTTP_200_OK)
+
+
 
 
 class RouteViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
@@ -338,3 +343,62 @@ class UnactiveStation(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListStationView(viewsets.ViewSet, generics.ListAPIView):
+    queryset = Station.objects.filter(active=True)
+    serializer_class = ListStationSerializer
+    pagination_class = StandardResultsSetPagination
+
+
+class RevenueReportView(View):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, station_id,*args, **kwargs):
+        start_date_str = request.GET.get('start_date', None)
+        end_date_str = request.GET.get('end_date', None)
+
+        if start_date_str is None or end_date_str is None:
+            return JsonResponse({'error': 'Missing start_date or end_date parameter.'})
+
+        start_date = date.strptime(start_date_str, '%Y-%m-%d')
+        end_date = date.strptime(end_date_str, '%Y-%m-%d')
+
+        station = Station.objects.get(pk=station_id)
+
+        bookings = Booking.objects.filter(
+            Q(trip__station=station) &
+            Q(payment_status=1) &
+            Q(booking_time__range=(start_date, end_date))
+        )
+
+        total_revenue_by_month = {}
+        total_revenue_by_quarter = {}
+        total_revenue_by_year = {}
+
+        for booking in bookings:
+            booking_month = booking.booking_time.month
+            booking_quarter = (booking_month - 1) // 3 + 1
+            booking_year = booking.booking_time.year
+
+            if booking_year not in total_revenue_by_year:
+                total_revenue_by_year[booking_year] = 0
+
+            if booking_quarter not in total_revenue_by_quarter:
+                total_revenue_by_quarter[booking_quarter] = 0
+
+            if booking_month not in total_revenue_by_month:
+                total_revenue_by_month[booking_month] = 0
+
+            total_revenue_by_year[booking_year] += booking.total_price
+            total_revenue_by_quarter[booking_quarter] += booking.total_price
+            total_revenue_by_month[booking_month] += booking.total_price
+
+
+        result = {
+            'total_revenue_by_month': total_revenue_by_month,
+            'total_revenue_by_quarter': total_revenue_by_quarter,
+            'total_revenue_by_year': total_revenue_by_year,
+        }
+
+        return JsonResponse(result)

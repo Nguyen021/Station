@@ -118,6 +118,7 @@ class Delivery(BaseModel):
     delivery_time = models.DateTimeField(null=True)
     price_of_goods = models.FloatField(null=True)
     price_of_ship = models.FloatField(null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='delivery_user')
 
     def __str__(self):
         return f'{self.name}  - {self.sender_name} - {self.sender_address} - {self.sender_phone} - {self.receiver_name} ' \
@@ -148,3 +149,6 @@ class ActionBase(BaseModel):
 
 class Rating(ActionBase):
     rate = models.SmallIntegerField(default=0)
+
+
+
