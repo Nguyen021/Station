@@ -47,19 +47,20 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
 
 class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Station.objects.filter(active=True)
-    serializer_class = StationByUserSerializer
+    serializer_class = StationSerializer
     pagination_class = StandardResultsSetPagination
 
     def create(self, request):
         user = request.user
         data = request.data
-        serializer = StationByUserSerializer(data=data)
+        serializer = StationSerializer(data=data)
 
         if serializer.is_valid():
             station = serializer.save(user=user)
-            return Response(StationByUserSerializer(station).data, status=status.HTTP_201_CREATED)
+            return Response(StationSerializer(station).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     @action(methods=['get'], detail=True, url_path='routes')
     def routes(self, request, pk):
