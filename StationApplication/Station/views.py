@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment, Rating
 from .pagination import StandardResultsSetPagination
 from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, \
-    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer
+    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer, StationByUserSerializer
 
 
 def index(request):
@@ -47,17 +47,17 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
 
 class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Station.objects.filter(active=True)
-    serializer_class = StationSerializer
+    serializer_class = StationByUserSerializer
     pagination_class = StandardResultsSetPagination
 
     def create(self, request):
         user = request.user
         data = request.data
-        serializer = StationSerializer(data=data)
+        serializer = StationByUserSerializer(data=data)
 
         if serializer.is_valid():
             station = serializer.save(user=user)
-            return Response(StationSerializer(station).data, status=status.HTTP_201_CREATED)
+            return Response(StationByUserSerializer(station).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -124,6 +124,23 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     pagination_class = StandardResultsSetPagination
     permission_classes = []
 
+
+    def get_queryset(self):
+        start_point = self.request.query_params.get('start_point', None)
+        end_point = self.request.query_params.get('end_point', None)
+        start_time = self.request.query_params.get('start_time', None)
+
+        trips = Trip.objects.all()
+
+        if start_point:
+            trips = trips.filter(route__start_point__icontains=start_point)
+        if end_point:
+            trips = trips.filter(route__end_point__icontains=end_point)
+        if start_time:
+            trips = trips.filter(start_time__gte=start_time)
+
+        return trips
+
     def create(self, request, *args, **kwargs):
         route_id = request.data.get('route_id')
         bus_id = request.data.get('bus_id')
@@ -188,14 +205,6 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return [permissions.AllowAny()]
 
-    def get_queryset(self):
-        query = self.request.query_params.get('q', None)
-        trips = Trip.objects.all()
-        if query is not None:
-            trips = trips.filter(Q(route__start_point__icontains=query) |
-                                 Q(route__end_point__icontains=query))
-        return trips
-
     @action(methods=['get'], detail=True, url_path='list-comments')
     def list_comments(self, request, pk):
         c = self.get_object()
@@ -230,39 +239,25 @@ class DeliveryViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
     pagination_class = StandardResultsSetPagination
 
 
-class SearchTripView(APIView):
-    def get(self, request):
-        # Lấy các tham số tìm kiếm từ URL query params
-        start_point = request.query_params.get('start_point', None)
-        end_point = request.query_params.get('end_point', None)
-        page = request.GET.get('page', 1)
+class TripSearchViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+    serializer_class = TripSerializer
+    pagination_class = StandardResultsSetPagination
 
-        # Xây dựng query để lọc trips
-        query = Q()
+    def get_queryset(self):
+        start_point = self.request.query_params.get('start_point', None)
+        end_point = self.request.query_params.get('end_point', None)
+        start_time = self.request.query_params.get('start_time', None)
+
+        trips = Trip.objects.all()
+
         if start_point:
-            query &= Q(route__start_point__icontains=start_point)
+            trips = trips.filter(route__start_point__icontains=start_point)
         if end_point:
-            query &= Q(route__start_point__icontains=end_point)
+            trips = trips.filter(route__end_point__icontains=end_point)
+        if start_time:
+            trips = trips.filter(start_time__gte=start_time)
 
-        # Lọc các trips thỏa mãn query
-        trips = Trip.objects.filter(query)
-        paginator = Paginator(trips, 10)
-
-        try:
-            # get the specified page
-            trip_page = paginator.page(page)
-        except Exception:
-            # if the page is invalid, return an error response
-            return Response({'error': 'Số trang không hợp lệ'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Serialize kết quả trả về
-        serializer = TripSerializer(trips, many=True)
-        return Response({
-            'count': paginator.count,
-            'num_pages': paginator.num_pages,
-            'current_page': trip_page.number,
-            'trips': serializer.data,
-        }, status=status.HTTP_200_OK)
+        return trips
 
 
 class BookingCreate(viewsets.ViewSet, generics.CreateAPIView):

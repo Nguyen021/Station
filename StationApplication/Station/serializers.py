@@ -28,13 +28,15 @@ class UserSerializer(ModelSerializer):
 
 class StationSerializer(ModelSerializer):
     user = SerializerMethodField()
-    rate = SerializerMethodField()
+    # rate = SerializerMethodField()
 
-    def get_rate(self, station):
-        request = self.context.get('request')
-        if request:
-            r = station.rating_set.filter(user=request.user).first()
-            return r.rate if r else 0
+    # def get_rate(self, station):
+    #     if self.context.get('request'):
+    #         request = self.context.get('request')
+    #         if request:
+    #             r = station.rating_set.filter(user=request.user).first()
+    #             return r.rate if r else 0
+    #     return None
 
     def get_user(self, station):
         user = station.user
@@ -50,7 +52,36 @@ class StationSerializer(ModelSerializer):
 
     class Meta:
         model = Station
-        fields = ['id', 'name', 'address', 'user', 'rate', 'active']
+        fields = ['id', 'name', 'address', 'user', 'active']
+
+
+class StationByUserSerializer(ModelSerializer):
+    user = SerializerMethodField()
+    rate = SerializerMethodField()
+
+    def get_rate(self, station):
+        if self.context.get('request'):
+            request = self.context.get('request')
+            if request:
+                r = station.rating_set.filter(user=request.user).first()
+                return r.rate if r else 0
+        return None
+
+    def get_user(self, station):
+        user = station.user
+        if user:
+            return {
+                'id': user.id,
+                'username': user.username,
+                'firstname': user.first_name,
+                'lastname': user.last_name,
+                'email': user.email
+            }
+        return None
+
+    class Meta:
+        model = Station
+        fields = ['id', 'name', 'address', 'user', 'active']
 
 
 class RouteSerializer(ModelSerializer):
