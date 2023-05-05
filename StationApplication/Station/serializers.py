@@ -1,5 +1,5 @@
 from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, ListSerializer
 
 
 class UserSerializer(ModelSerializer):
@@ -19,7 +19,8 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'image', 'email', 'phone_number', 'is_station']
+        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'image', 'email', 'phone_number',
+                  'is_station']
         extra_kwargs = {
             'password': {'write_only': True},
             'image': {'write_only': True}
@@ -28,6 +29,7 @@ class UserSerializer(ModelSerializer):
 
 class StationSerializer(ModelSerializer):
     user = SerializerMethodField()
+
     # rate = SerializerMethodField()
 
     # def get_rate(self, station):

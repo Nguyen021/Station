@@ -23,7 +23,7 @@ def index(request):
     return HttpResponse("My Application for Station")
 
 
-class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserSerializer
     parser_classes = [parsers.MultiPartParser, ]
@@ -60,7 +60,6 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
             return Response(StationSerializer(station).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     @action(methods=['get'], detail=True, url_path='routes')
     def routes(self, request, pk):
@@ -105,13 +104,21 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
         return Response(status=status.HTTP_200_OK)
 
 
-
-
 class RouteViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Route.objects.filter(active=True)
     serializer_class = RouteSerializer
     pagination_class = StandardResultsSetPagination
 
+    @action(methods=['get'], detail=False, url_path='list-start-end-points')
+    def get_list_start_end_point(self, request):
+        routes = Route.objects.all()
+        start_points = set([route.start_point for route in routes])
+        end_points = set([route.end_point for route in routes])
+        data = {
+            'start_points': start_points,
+            'end_points': end_points
+        }
+        return Response(data)
 
 class BusViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Bus.objects.filter(active=True)
@@ -124,7 +131,6 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = TripSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = []
-
 
     def get_queryset(self):
         start_point = self.request.query_params.get('start_point', None)
@@ -170,7 +176,6 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
     def put(self, request, *args, **kwargs):
         route_id = request.data.get('route_id')
         bus_id = request.data.get('bus_id')
@@ -198,7 +203,6 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         trip = serializer.save(route=route, bus=bus, station=station)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
     def get_permissions(self):
         if self.action in ['assign_tag', 'comments', 'like', 'rating']:
@@ -270,12 +274,11 @@ class BookingCreate(viewsets.ViewSet, generics.CreateAPIView):
         # Lấy id của chuyến đi từ yêu cầu
         trip_id = request.data.get('trip_id')
 
-        #chọn loại thanh toán
+        # chọn loại thanh toán
         payment_method = request.data.get('payment_method')
 
         # Lấy số lượng vé từ yêu cầu
         number_of_seats = request.data.get('number_of_seats')
-
 
         # Kiểm tra xem số lượng vé có khả dụng không
         trip = Trip.objects.get(pk=trip_id)
@@ -306,6 +309,7 @@ class BookingCreate(viewsets.ViewSet, generics.CreateAPIView):
 class BookingList(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = BookingSerializer
     pagination_class = StandardResultsSetPagination
+
     def get_queryset(self):
         # Lấy danh sách các booking của người dùng hiện tại
         return Booking.objects.filter(user=self.request.user)
@@ -350,7 +354,7 @@ class ListStationView(viewsets.ViewSet, generics.ListAPIView):
 class RevenueReportView(View):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, station_id,*args, **kwargs):
+    def get(self, request, station_id, *args, **kwargs):
         start_date_str = request.GET.get('start_date', None)
         end_date_str = request.GET.get('end_date', None)
 
@@ -389,7 +393,6 @@ class RevenueReportView(View):
             total_revenue_by_year[booking_year] += booking.total_price
             total_revenue_by_quarter[booking_quarter] += booking.total_price
             total_revenue_by_month[booking_month] += booking.total_price
-
 
         result = {
             'total_revenue_by_month': total_revenue_by_month,
