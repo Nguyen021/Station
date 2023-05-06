@@ -9,13 +9,13 @@ route.register('route', RouteViewSet)
 route.register('bus', BusViewSet)
 route.register('trip', TripViewSet)
 route.register('delivery', DeliveryViewSet)
+route.register('comments', CommentViewSet)
 route.register('booking', BookingList, basename='booking-list')
 route.register('booking-create', BookingCreate, basename='booking-create')
 route.register('list-station', ListStationView, basename='list-station')
 route.register('search-trip', TripSearchViewSet, basename='search-trip')
 urlpatterns = [
     path('', include(route.urls)),
-    # path('trip/search/', TripSearchViewSet.as_view(), name='search_trip'),
     path('trip/compare/<int:route_id>/', TripCompareView.as_view(), name='trip_compare'),
     path('station/<int:station_id>/unactive/', UnactiveStation.as_view(), name='station_unactive'),
     path('revenue_report/<int:station_id>', RevenueReportView.as_view(), name='revenue_report'),

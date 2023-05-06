@@ -149,6 +149,3 @@ class ActionBase(BaseModel):
 
 class Rating(ActionBase):
     rate = models.SmallIntegerField(default=0)
-
-
-

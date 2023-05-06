@@ -3,7 +3,7 @@ import datetime
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views import View
 from rest_framework import viewsets, parsers, generics, permissions
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework import status
@@ -11,10 +11,11 @@ from rest_framework.views import APIView
 from django.core.paginator import Paginator
 from django.db import transaction
 from datetime import datetime as date
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment, Rating
 from .pagination import StandardResultsSetPagination
+from .perms import CommentOwner, IsStation
 from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, \
     DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer, StationByUserSerializer
 
@@ -50,6 +51,7 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
     serializer_class = StationSerializer
     pagination_class = StandardResultsSetPagination
 
+    @permission_classes([IsAuthenticated])
     def create(self, request):
         user = request.user
         data = request.data
@@ -61,6 +63,7 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @permission_classes([IsStation])
     @action(methods=['get'], detail=True, url_path='routes')
     def routes(self, request, pk):
         c = self.get_object()  # Course.query.get(pk=pk)
@@ -68,6 +71,7 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
         return Response(RouteSerializer(routes, many=True, context={'request': request}).data)
 
+    @permission_classes([IsStation])
     @action(methods=['get'], detail=True, url_path='trip')
     def trips(self, request, pk):
         c = self.get_object()  # Course.query.get(pk=pk)
@@ -75,6 +79,7 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
         return Response(TripSerializer(routes, many=True, context={'request': request}).data)
 
+    @permission_classes([IsStation])
     @action(methods=['get'], detail=True, url_path='bus')
     def bus(self, request, pk):
         c = self.get_object()  # Course.query.get(pk=pk)
@@ -82,12 +87,14 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
         return Response(BusSerializer(bus, many=True, context={'request': request}).data)
 
+    @permission_classes([IsAuthenticated])
     @action(methods=['post'], detail=True, url_path='comments')
     def comments(self, request, pk):
         c = Comment(content=request.data['content'], station=self.get_object(), user=request.user)
         c.save()
         return Response(CommentSerializer(c, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
+    @permission_classes([IsAuthenticated])
     @action(methods=['get'], detail=True, url_path='list-comments')
     def list_comments(self, request, pk):
         s = self.get_object()
@@ -95,6 +102,7 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
         return Response(CommentSerializer(comment, many=True, context={'request': request}).data)
 
+    @permission_classes([IsAuthenticated])
     @action(methods=['post'], detail=True, url_path='rating')
     def rating(self, request, pk):
         r, _ = Rating.objects.get_or_create(station=self.get_object(), user=request.user)
@@ -108,6 +116,7 @@ class RouteViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
     queryset = Route.objects.filter(active=True)
     serializer_class = RouteSerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [IsStation]
 
     @action(methods=['get'], detail=False, url_path='list-start-end-points')
     def get_list_start_end_point(self, request):
@@ -124,14 +133,15 @@ class BusViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrieve
     queryset = Bus.objects.filter(active=True)
     serializer_class = BusSerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [IsStation]
 
 
 class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Trip.objects.filter(active=True)
     serializer_class = TripSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = []
 
+    @permission_classes([IsAuthenticated])
     def get_queryset(self):
         start_point = self.request.query_params.get('start_point', None)
         end_point = self.request.query_params.get('end_point', None)
@@ -148,6 +158,7 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return trips
 
+    @permission_classes([IsStation])
     def create(self, request, *args, **kwargs):
         route_id = request.data.get('route_id')
         bus_id = request.data.get('bus_id')
@@ -176,6 +187,7 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @permission_classes([IsStation])
     def put(self, request, *args, **kwargs):
         route_id = request.data.get('route_id')
         bus_id = request.data.get('bus_id')
@@ -210,6 +222,7 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return [permissions.AllowAny()]
 
+    @permission_classes([IsAuthenticated])
     @action(methods=['get'], detail=True, url_path='list-comments')
     def list_comments(self, request, pk):
         c = self.get_object()
@@ -217,12 +230,14 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(CommentSerializer(comment, many=True, context={'request': request}).data)
 
+    @permission_classes([IsAuthenticated])
     @action(methods=['post'], detail=True, url_path='comments')
     def comments(self, request, pk):
         c = Comment(content=request.data['content'], trip=self.get_object(), user=request.user)
         c.save()
         return Response(CommentSerializer(c, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
+    @permission_classes([IsAuthenticated])
     @action(methods=['delete'], detail=True, url_path='comments/(?P<comment_id>[^/.]+)')
     def delete_comment(self, request, pk, comment_id):
         trip = self.get_object()
@@ -242,9 +257,10 @@ class DeliveryViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Ret
     queryset = Delivery.objects.filter(active=True)
     serializer_class = DeliverySerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticated]
 
 
-class TripSearchViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+class TripSearchViewSet(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = TripSerializer
     pagination_class = StandardResultsSetPagination
 
@@ -268,6 +284,7 @@ class TripSearchViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
 class BookingCreate(viewsets.ViewSet, generics.CreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
@@ -309,6 +326,7 @@ class BookingCreate(viewsets.ViewSet, generics.CreateAPIView):
 class BookingList(viewsets.ViewSet, generics.ListAPIView):
     serializer_class = BookingSerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Lấy danh sách các booking của người dùng hiện tại
@@ -332,6 +350,8 @@ class TripCompareView(APIView):
 
 
 class UnactiveStation(APIView):
+    permission_classes = [IsAdminUser]
+
     def put(self, request, station_id):
         try:
             station = Station.objects.get(pk=station_id)
@@ -352,7 +372,7 @@ class ListStationView(viewsets.ViewSet, generics.ListAPIView):
 
 
 class RevenueReportView(View):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsStation]
 
     def get(self, request, station_id, *args, **kwargs):
         start_date_str = request.GET.get('start_date', None)
@@ -401,3 +421,9 @@ class RevenueReportView(View):
         }
 
         return JsonResponse(result)
+
+
+class CommentViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateAPIView):
+    queryset = Comment.objects.filter(active=True)
+    serializer_class = CommentSerializer
+    permission_classes = [CommentOwner]
