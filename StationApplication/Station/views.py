@@ -144,7 +144,7 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         if end_point:
             trips = trips.filter(route__end_point__icontains=end_point)
         if start_time:
-            trips = trips.filter(start_time__gte=start_time)
+            trips = trips.filter(start_time__=start_time)
 
         return trips
 
@@ -260,7 +260,7 @@ class TripSearchViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
         if end_point:
             trips = trips.filter(route__end_point__icontains=end_point)
         if start_time:
-            trips = trips.filter(start_time__gte=start_time)
+            trips = trips.filter(start_time__icontains=start_time)
 
         return trips
 
