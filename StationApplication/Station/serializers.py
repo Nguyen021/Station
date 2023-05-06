@@ -9,9 +9,18 @@ class StationUserSerializer(ModelSerializer):
         fields = ['id', 'name', 'address', 'active']
 
 
+class BookingUserSerializer(ModelSerializer):
+
+    class Meta:
+        model = Booking
+        fields = ['id', 'number_of_seats',
+                  'payment_method', 'payment_status', 'booking_time', 'total_price']
+
+
 class UserSerializer(ModelSerializer):
     image = SerializerMethodField(source='avatar')
     stations = SerializerMethodField()
+    bookings = SerializerMethodField()
 
     def get_image(self, user):
         if user.avatar:
@@ -21,6 +30,10 @@ class UserSerializer(ModelSerializer):
     def get_stations(self, obj):
         stations = Station.objects.filter(user=obj)
         return StationUserSerializer(stations, many=True).data
+
+    def get_bookings(self, obj):
+        bookings = Booking.objects.filter(user=obj)
+        return BookingUserSerializer(bookings, many=True).data
 
     def create(self, validated_data):
         avatar = self.context['request'].FILES.get('avatar')
@@ -35,7 +48,7 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'password', 'image', 'email', 'phone_number',
-                  'is_station', 'stations']
+                  'is_station', 'stations', 'bookings']
         extra_kwargs = {
             'password': {'write_only': True},
             'image': {'write_only': True}
