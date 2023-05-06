@@ -20,7 +20,7 @@ class UserSerializer(ModelSerializer):
 
     def get_stations(self, obj):
         stations = Station.objects.filter(user=obj)
-        return StationSerializer(stations, many=True).data
+        return StationUserSerializer(stations, many=True).data
 
     def create(self, validated_data):
         avatar = self.context['request'].FILES.get('avatar')
