@@ -51,6 +51,14 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        station = Station.objects.all()
+        stations = station.filter(user=user)
+
+        return stations
+
+
     def create(self, request):
         user = request.user
         data = request.data

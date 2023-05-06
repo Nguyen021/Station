@@ -2,13 +2,25 @@ from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
+class StationUserSerializer(ModelSerializer):
+
+    class Meta:
+        model = Station
+        fields = ['id', 'name', 'address', 'active']
+
+
 class UserSerializer(ModelSerializer):
     image = SerializerMethodField(source='avatar')
+    stations = SerializerMethodField()
 
     def get_image(self, user):
         if user.avatar:
             request = self.context.get('request')
             return request.build_absolute_uri('/static/%s' % user.avatar.name) if request else ''
+
+    def get_stations(self, obj):
+        stations = Station.objects.filter(user=obj)
+        return StationSerializer(stations, many=True).data
 
     def create(self, validated_data):
         avatar = self.context['request'].FILES.get('avatar')
@@ -23,7 +35,7 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'username', 'password', 'image', 'email', 'phone_number',
-                  'is_station']
+                  'is_station', 'stations']
         extra_kwargs = {
             'password': {'write_only': True},
             'image': {'write_only': True}
@@ -198,3 +210,4 @@ class ListStationSerializer(ModelSerializer):
     class Meta:
         model = Station
         fields = ['id', 'name', 'address', 'user', 'active']
+
