@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.views import APIView
-from django.core.paginator import Paginator
 from django.db import transaction
 from datetime import datetime as date
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -17,7 +16,7 @@ from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment,
 from .pagination import StandardResultsSetPagination
 from .perms import CommentOwner, IsStation
 from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, \
-    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer, StationByUserSerializer
+    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer
 
 
 def index(request):
@@ -27,7 +26,7 @@ def index(request):
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
     serializer_class = UserSerializer
-    parser_classes = [parsers.MultiPartParser, ]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser]
 
     def get_permissions(self):
         if self.action in ['current_user']:

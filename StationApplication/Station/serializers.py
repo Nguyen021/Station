@@ -1,9 +1,9 @@
 from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, ListSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
 class UserSerializer(ModelSerializer):
-    image = SerializerMethodField(source='image')
+    image = SerializerMethodField(source='avatar')
 
     def get_image(self, user):
         if user.avatar:
@@ -11,7 +11,10 @@ class UserSerializer(ModelSerializer):
             return request.build_absolute_uri('/static/%s' % user.avatar.name) if request else ''
 
     def create(self, validated_data):
+        avatar = self.context['request'].FILES.get('avatar')
         data = validated_data.copy()
+        if avatar:
+            data['avatar'] = avatar
         u = User(**data)
         u.set_password(u.password)
         u.save()
