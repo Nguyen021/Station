@@ -49,15 +49,6 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
     queryset = Station.objects.filter(active=True)
     serializer_class = StationSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        station = Station.objects.all()
-        stations = station.filter(user=user)
-
-        return stations
-
 
     def create(self, request):
         user = request.user
@@ -73,9 +64,6 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
     @action(methods=['get'], detail=True, url_path='routes')
     def routes(self, request, pk):
-        user = request.user
-        if user.is_station != 1:
-            return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
         c = self.get_object()  # Course.query.get(pk=pk)
         routes = c.route_set.filter(active=True)
 
