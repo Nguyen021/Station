@@ -46,7 +46,7 @@ class StationSerializer(ModelSerializer):
     user = SerializerMethodField()
 
     # rate = SerializerMethodField()
-
+    #
     # def get_rate(self, station):
     #     if self.context.get('request'):
     #         request = self.context.get('request')

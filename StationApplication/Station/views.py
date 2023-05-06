@@ -16,7 +16,7 @@ from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment,
 from .pagination import StandardResultsSetPagination
 from .perms import CommentOwner, IsStation
 from .serializers import UserSerializer, StationSerializer, RouteSerializer, BusSerializer, TripSerializer, \
-    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer
+    DeliverySerializer, BookingSerializer, CommentSerializer, ListStationSerializer, StationUserSerializer
 
 
 def index(request):
@@ -83,9 +83,6 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
     @action(methods=['get'], detail=True, url_path='trip')
     def trips(self, request, pk):
-        user = request.user
-        if user.is_station != 1:
-            return Response(data={"message": "No permission"},status=status.HTTP_403_FORBIDDEN)
         c = self.get_object()  # Course.query.get(pk=pk)
         routes = c.trip_set.filter(active=True)
 
