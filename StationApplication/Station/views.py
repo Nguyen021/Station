@@ -1,6 +1,6 @@
 import datetime
 
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse
 from django.views import View
 from rest_framework import viewsets, parsers, generics, permissions
 from rest_framework.decorators import action, permission_classes
@@ -49,51 +49,56 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
     queryset = Station.objects.filter(active=True)
     serializer_class = StationSerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticated]
 
-    @permission_classes([IsAuthenticated])
     def create(self, request):
         user = request.user
         data = request.data
         serializer = StationSerializer(data=data)
-
+        if user.is_station != 1:
+            return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
         if serializer.is_valid():
             station = serializer.save(user=user)
             return Response(StationSerializer(station).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @permission_classes([IsStation])
     @action(methods=['get'], detail=True, url_path='routes')
     def routes(self, request, pk):
+        user = request.user
+        if user.is_station != 1:
+            return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
         c = self.get_object()  # Course.query.get(pk=pk)
         routes = c.route_set.filter(active=True)
 
         return Response(RouteSerializer(routes, many=True, context={'request': request}).data)
 
-    @permission_classes([IsStation])
     @action(methods=['get'], detail=True, url_path='trip')
     def trips(self, request, pk):
+        user = request.user
+        if user.is_station != 1:
+            return Response(data={"message": "No permission"},status=status.HTTP_403_FORBIDDEN)
         c = self.get_object()  # Course.query.get(pk=pk)
         routes = c.trip_set.filter(active=True)
 
         return Response(TripSerializer(routes, many=True, context={'request': request}).data)
 
-    @permission_classes([IsStation])
     @action(methods=['get'], detail=True, url_path='bus')
     def bus(self, request, pk):
+        user = request.user
+        if user.is_station != 1:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         c = self.get_object()  # Course.query.get(pk=pk)
         bus = c.bus_station.filter(active=True)
 
         return Response(BusSerializer(bus, many=True, context={'request': request}).data)
 
-    @permission_classes([IsAuthenticated])
     @action(methods=['post'], detail=True, url_path='comments')
     def comments(self, request, pk):
         c = Comment(content=request.data['content'], station=self.get_object(), user=request.user)
         c.save()
         return Response(CommentSerializer(c, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
-    @permission_classes([IsAuthenticated])
     @action(methods=['get'], detail=True, url_path='list-comments')
     def list_comments(self, request, pk):
         s = self.get_object()
@@ -101,7 +106,6 @@ class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retr
 
         return Response(CommentSerializer(comment, many=True, context={'request': request}).data)
 
-    @permission_classes([IsAuthenticated])
     @action(methods=['post'], detail=True, url_path='rating')
     def rating(self, request, pk):
         r, _ = Rating.objects.get_or_create(station=self.get_object(), user=request.user)
@@ -115,7 +119,6 @@ class RouteViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
     queryset = Route.objects.filter(active=True)
     serializer_class = RouteSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = [IsStation]
 
     @action(methods=['get'], detail=False, url_path='list-start-end-points')
     def get_list_start_end_point(self, request):
@@ -128,6 +131,7 @@ class RouteViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retrie
         }
         return Response(data)
 
+
 class BusViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Bus.objects.filter(active=True)
     serializer_class = BusSerializer
@@ -139,8 +143,8 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     queryset = Trip.objects.filter(active=True)
     serializer_class = TripSerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticated]
 
-    @permission_classes([IsAuthenticated])
     def get_queryset(self):
         start_point = self.request.query_params.get('start_point', None)
         end_point = self.request.query_params.get('end_point', None)
@@ -157,8 +161,10 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return trips
 
-    @permission_classes([IsStation])
     def create(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_station != 1:
+            return Response(data={"message": "No permission"},status=status.HTTP_403_FORBIDDEN)
         route_id = request.data.get('route_id')
         bus_id = request.data.get('bus_id')
         station_id = request.data.get('station_id')
@@ -186,8 +192,10 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @permission_classes([IsStation])
     def put(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_station != 1:
+            return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
         route_id = request.data.get('route_id')
         bus_id = request.data.get('bus_id')
         station_id = request.data.get('station_id')
@@ -221,7 +229,6 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return [permissions.AllowAny()]
 
-    @permission_classes([IsAuthenticated])
     @action(methods=['get'], detail=True, url_path='list-comments')
     def list_comments(self, request, pk):
         c = self.get_object()
@@ -229,14 +236,12 @@ class TripViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return Response(CommentSerializer(comment, many=True, context={'request': request}).data)
 
-    @permission_classes([IsAuthenticated])
     @action(methods=['post'], detail=True, url_path='comments')
     def comments(self, request, pk):
         c = Comment(content=request.data['content'], trip=self.get_object(), user=request.user)
         c.save()
         return Response(CommentSerializer(c, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
-    @permission_classes([IsAuthenticated])
     @action(methods=['delete'], detail=True, url_path='comments/(?P<comment_id>[^/.]+)')
     def delete_comment(self, request, pk, comment_id):
         trip = self.get_object()
@@ -353,6 +358,9 @@ class UnactiveStation(APIView):
 
     def put(self, request, station_id):
         try:
+            user = request.user
+            if user.is_station != 1:
+                return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
             station = Station.objects.get(pk=station_id)
         except Station.DoesNotExist:
             return Response({'error': 'Station not found.'}, status=status.HTTP_404_NOT_FOUND)
@@ -374,6 +382,9 @@ class RevenueReportView(View):
     permission_classes = [IsStation]
 
     def get(self, request, station_id, *args, **kwargs):
+        user = request.user
+        if user.is_station != 1:
+            return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
         start_date_str = request.GET.get('start_date', None)
         end_date_str = request.GET.get('end_date', None)
 
