@@ -367,7 +367,7 @@ class UnactiveStation(APIView):
 
 class ListStationView(viewsets.ViewSet, generics.ListAPIView):
     queryset = Station.objects.filter(active=True)
-    serializer_class = ListStationSerializer
+    serializer_class = StationSerializer
     pagination_class = StandardResultsSetPagination
 
 

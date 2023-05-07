@@ -1,4 +1,7 @@
-from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment
+from django.contrib.auth.models import AnonymousUser
+from django.db.models import Avg
+
+from .models import User, Station, Route, Bus, Trip, Delivery, Booking, Comment, Rating
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
@@ -57,16 +60,24 @@ class UserSerializer(ModelSerializer):
 
 class StationSerializer(ModelSerializer):
     user = SerializerMethodField()
+    rate = SerializerMethodField()
+    total_rating = SerializerMethodField()
+    num_ratings = SerializerMethodField()
 
-    # rate = SerializerMethodField()
-    #
-    # def get_rate(self, station):
-    #     if self.context.get('request'):
-    #         request = self.context.get('request')
-    #         if request:
-    #             r = station.rating_set.filter(user=request.user).first()
-    #             return r.rate if r else 0
-    #     return None
+    def get_rate(self, station):
+        if self.context.get('request'):
+            request = self.context.get('request')
+            if not isinstance(request.user, AnonymousUser):
+                r = station.rating_set.filter(user=request.user).first()
+                return r.rate if r else 0
+        return None
+
+    def get_total_rating(self, station):
+        avg_rating = Rating.objects.filter(station=station).aggregate(Avg('rate'))['rate__avg']
+        return avg_rating
+
+    def get_num_ratings(self, obj):
+        return Rating.objects.filter(station=obj).count()
 
     def get_user(self, station):
         user = station.user
@@ -82,7 +93,7 @@ class StationSerializer(ModelSerializer):
 
     class Meta:
         model = Station
-        fields = ['id', 'name', 'address', 'user', 'active']
+        fields = ['id', 'name', 'address', 'user', 'active', 'rate', 'total_rating', 'num_ratings']
 
 
 class StationByUserSerializer(ModelSerializer):
