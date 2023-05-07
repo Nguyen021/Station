@@ -3,6 +3,7 @@ import { Dropdown, DropdownButton } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { ContextUser } from "../configs/ContextUser";
 import Apis, { endpoints } from "../configs/Apis";
+import cookie from "react-cookies";
 import ILoad from "./items/iLoad";
 
 const Header = () => {
@@ -12,6 +13,8 @@ const Header = () => {
   const [listStation, setListStation] = useState([]);
 
   const logout = () => {
+    cookie.remove("access-token");
+    cookie.remove("current-user");
     dispatch({
       type: "logout",
     });
@@ -71,9 +74,14 @@ const Header = () => {
               <Dropdown.Item href="#/action-1">My profile</Dropdown.Item>
               <Dropdown.Item href="#/action-2">Vé đã đặt</Dropdown.Item>
               {user.is_station ? (
-                <Dropdown.Item as={Link} to={"/manage-station/"}>
-                  Quản lý nhà xe
-                </Dropdown.Item>
+                <>
+                  <Dropdown.Item as={Link} to={"/manage-station/"}>
+                    Quản lý nhà xe
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to={"/stats-station/"}>
+                    Thống kê & Báo cáo
+                  </Dropdown.Item>
+                </>
               ) : null}
               <Dropdown.Item onClick={logout}>Đăng xuất</Dropdown.Item>
             </Dropdown.Menu>

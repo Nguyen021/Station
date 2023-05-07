@@ -232,7 +232,7 @@ const Home = () => {
                   <Card.Text>
                     Trong khoảng :{" "}
                     <span style={{ fontWeight: "bold" }}>
-                      {item.route.duration} h
+                      {item.route.duration}h
                     </span>
                   </Card.Text>
                   <div
@@ -243,8 +243,7 @@ const Home = () => {
                   >
                     <p style={{ fontWeight: "bold" }}>
                       {" "}
-                      Giá vé:
-                      {item.price.toLocaleString()} VNĐ
+                      Giá vé: {item.price.toLocaleString()} VNĐ
                     </p>
                     <div style={{ display: "flex" }}>
                       <Button

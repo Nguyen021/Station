@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import { useContext, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ContextUser } from "../configs/ContextUser";
 import Apis, { authAPI, endpoints } from "../configs/Apis";
 import { Card, Col, Container, ListGroup, Navbar, Row } from "react-bootstrap";
 import ILoad from "../layouts/items/iLoad";
 import IError from "../layouts/items/iError";
+import { ToastContainer, toast } from "react-toastify";
 
 const StationDetail = () => {
   const [listTrip, setListTrip] = useState([]);
@@ -20,7 +21,7 @@ const StationDetail = () => {
     const hour = date.getHours().toString().padStart(2, "0");
     const minute = date.getMinutes().toString().padStart(2, "0");
 
-    return `${hour}:${minute} ${day}-${month}-${year} `;
+    return `${hour}h:${minute}m - ngày ${day} ${month} ${year} `;
   }
 
   const getListTripByStation = async () => {
@@ -45,10 +46,15 @@ const StationDetail = () => {
   }, [stationId]);
 
   if (listTrip.length === 0) {
-    let err = "Không tìm thấy chuyến xe";
+    let err = "Không tìm thấy chuyến xe nào";
+
     return (
       <>
-        <IError err={err} />
+        {" "}
+        <ToastContainer />
+        <div style={{ marginTop: "10px" }}>
+          <IError err={err} />
+        </div>
       </>
     );
   }
@@ -106,18 +112,25 @@ const StationDetail = () => {
               {listTrip.map((trip) => (
                 <Col md={4}>
                   <Card className="p-3" style={{ width: "100%" }}>
-                    <Card.Img variant="top" src={trip.image} />
+                    <Card.Img
+                      className="fluid"
+                      variant="top"
+                      src={trip.image}
+                      style={{ height: "250px", objectFit: "cover" }}
+                    />
                     <Card.Body>
                       <Card.Title>
                         {trip.route.start_point} - {trip.route.end_point}
                       </Card.Title>
                       <Card.Text>
-                        Thời gian bắt đầu: {formatDate(trip.start_time)}
+                        Thời gian bắt đầu: {formatDate(trip.start_time)} <br />
                         Dự kiến đến vào: {formatDate(trip.end_time)}
                       </Card.Text>
                     </Card.Body>
                     <ListGroup className="list-group-flush">
-                      <ListGroup.Item>Giá {trip.price}</ListGroup.Item>
+                      <ListGroup.Item>
+                        Giá: {trip.price.toLocaleString()} VNĐ
+                      </ListGroup.Item>
                       <ListGroup.Item>
                         <i class="fa-solid fa-location-dot"></i>{" "}
                         {trip.station.address}
@@ -133,8 +146,27 @@ const StationDetail = () => {
                       </ListGroup.Item>
                     </ListGroup>
                     <Card.Body>
-                      <Card.Link href="#">Card Link</Card.Link>
-                      <Card.Link href="#">Another Link</Card.Link>
+                      <Link
+                        to={`/detail/${trip.id}`}
+                        style={{
+                          textDecoration: "none",
+                          fontWeight: "bold",
+                          color: "gray",
+                        }}
+                      >
+                        Xem chi tiết
+                      </Link>
+                      <Link
+                        to="/"
+                        style={{
+                          textDecoration: "none",
+                          fontWeight: "bold",
+                          color: "gray",
+                          marginLeft: "135px",
+                        }}
+                      >
+                        Đặt vé ngay
+                      </Link>
                     </Card.Body>
                   </Card>
                 </Col>

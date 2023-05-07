@@ -166,7 +166,7 @@ const Footer = () => {
             className="text-white "
             href="https://github.com/Nguyen021/Station"
           >
-            Hà Trường Nguyên - Dương Trung Nguyên
+            Dương Trung Nguyên - Hà Trường Nguyên
           </a>
         </div>
       </footer>

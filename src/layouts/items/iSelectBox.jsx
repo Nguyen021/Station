@@ -1,8 +1,9 @@
 import { Form } from "react-bootstrap";
 
-const ISelectBox = ({ options, onChange }) => {
+const ISelectBox = ({ value, options, onChange }) => {
   return (
-    <Form.Select onChange={onChange}>
+    <Form.Select onChange={onChange} value={value}>
+      <option value="0">-- Mời chọn ---</option>
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}

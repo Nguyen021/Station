@@ -11,6 +11,7 @@ const ILoad = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        border: "0",
       }}
     >
       <Spinner
