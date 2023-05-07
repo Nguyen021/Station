@@ -375,9 +375,6 @@ class RevenueReportView(View):
     permission_classes = [IsStation]
 
     def get(self, request, station_id, *args, **kwargs):
-        user = request.user
-        if user.is_station != 1:
-            return Response(data={"message": "No permission"}, status=status.HTTP_403_FORBIDDEN)
         start_date_str = request.GET.get('start_date', None)
         end_date_str = request.GET.get('end_date', None)
 
