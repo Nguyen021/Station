@@ -12,10 +12,11 @@ export const endpoints = {
   "create-comment": (tripId) => `/trip/${tripId}/comments/`,
   "list-station": "/list-station/",
   "get-trip-by-station": (stationId) => `/station/${stationId}/trip/`,
-
+  "station-detail": (stationId) => `/station/${stationId}/`,
   "create-booking": `/booking-create/`,
-
+  "rate-station": (stationId) => `/station/${stationId}/rating/`,
   "report-revenue": (stationId) => `/revenue_report/${stationId}`,
+  "get-user-detail": (userId) => `/users/${userId}/`,
 };
 
 export const authAPI = () =>

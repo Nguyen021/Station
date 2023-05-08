@@ -17,6 +17,7 @@ import moment from "moment";
 import StationDetail from "./components/StationDetail";
 import StationMange from "./components/StationMange";
 import StatsStation from "./components/StatsStation";
+import ChatForum from "./components/Chats/ChatForum";
 
 moment().local("vi");
 function App() {
@@ -42,6 +43,7 @@ function App() {
             <Route path="/manage-station/" element={<StationMange />} />
             <Route path="*" element={<Comming />} />
             <Route path="/stats-station/" element={<StatsStation />} />
+            <Route path="/chat/:stationId" element={<ChatForum />} />
           </Routes>
         </Container>
         <Footer />

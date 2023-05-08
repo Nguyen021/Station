@@ -3,7 +3,7 @@ import { Dropdown, DropdownButton } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { ContextUser } from "../configs/ContextUser";
 import Apis, { endpoints } from "../configs/Apis";
-import cookie from "react-cookies";
+import cookies from "react-cookies";
 import ILoad from "./items/iLoad";
 
 const Header = () => {
@@ -13,8 +13,8 @@ const Header = () => {
   const [listStation, setListStation] = useState([]);
 
   const logout = () => {
-    cookie.remove("access-token");
-    cookie.remove("current-user");
+    cookies.remove("access-token");
+    cookies.remove("current-user");
     dispatch({
       type: "logout",
     });
