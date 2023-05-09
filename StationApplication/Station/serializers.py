@@ -87,7 +87,9 @@ class StationSerializer(ModelSerializer):
                 'username': user.username,
                 'firstname': user.first_name,
                 'lastname': user.last_name,
-                'email': user.email
+                'email': user.email,
+                'is_station': user.is_station,
+                'avatar': 'https://http://127.0.0.1:8000//static/%s' % user.avatar.name
             }
         return None
 
