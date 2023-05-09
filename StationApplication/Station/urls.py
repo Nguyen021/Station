@@ -14,6 +14,7 @@ route.register('booking', BookingList, basename='booking-list')
 route.register('booking-create', BookingCreate, basename='booking-create')
 route.register('list-station', ListStationView, basename='list-station')
 route.register('search-trip', TripSearchViewSet, basename='search-trip')
+route.register('list-user', ListUserViewSet, basename='list-user')
 urlpatterns = [
     path('', include(route.urls)),
     path('trip/compare/<int:route_id>/', TripCompareView.as_view(), name='trip_compare'),

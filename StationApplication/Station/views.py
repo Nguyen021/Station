@@ -46,6 +46,12 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         return Response(UserSerializer(u, context={'request': request}).data)
 
 
+class ListUserViewSet(viewsets.ViewSet, generics.ListAPIView):
+    queryset = User.objects.filter(is_active=True)
+    serializer_class = UserSerializer
+    pagination_class = StandardResultsSetPagination
+
+
 class StationViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Station.objects.filter(active=True)
     serializer_class = StationSerializer
