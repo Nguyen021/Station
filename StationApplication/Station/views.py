@@ -1,9 +1,10 @@
 import datetime
 
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views import View
 from rest_framework import viewsets, parsers, generics, permissions
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action, permission_classes, api_view
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework import status
@@ -427,3 +428,43 @@ class CommentViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateA
     queryset = Comment.objects.filter(active=True)
     serializer_class = CommentSerializer
     permission_classes = [CommentOwner]
+
+
+def get_trips_by_station_and_route(station_id, route_id):
+    station = get_object_or_404(Station, pk=station_id)
+    route = get_object_or_404(Route, pk=route_id, station=station)
+
+    return Trip.objects.filter(route=route, station=station)
+
+
+def get_bookings_by_trips(trips):
+    return Booking.objects.filter(trip__in=trips)
+
+
+def get_booking_stats_by_trips(bookings, trips):
+    stats = []
+    for trip in trips:
+        count = bookings.filter(trip=trip).count()
+        stats.append({
+            'trip_id': trip.id,
+            'start_time': trip.start_time,
+            'end_time': trip.end_time,
+            'price': trip.price,
+            'available_seats': trip.available_seats,
+            'booked_seats': count,
+            'percent_booked_seats': count / trip.available_seats * 100 if trip.available_seats > 0 else 0,
+        })
+    return stats
+
+
+@api_view(['GET'])
+def booking_stats_by_station_and_route(request, station_id, route_id):
+    trips = get_trips_by_station_and_route(station_id, route_id)
+    bookings = get_bookings_by_trips(trips)
+    stats = get_booking_stats_by_trips(bookings, trips)
+    bookings_count = len(stats)
+
+    return Response(data={
+        'booking_stats': stats,
+        "total": bookings_count
+    })

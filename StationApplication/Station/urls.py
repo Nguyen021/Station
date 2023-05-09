@@ -19,4 +19,5 @@ urlpatterns = [
     path('trip/compare/<int:route_id>/', TripCompareView.as_view(), name='trip_compare'),
     path('station/<int:station_id>/unactive/', UnactiveStation.as_view(), name='station_unactive'),
     path('revenue_report/<int:station_id>', RevenueReportView.as_view(), name='revenue_report'),
+    path('station/<int:station_id>/routes/<int:route_id>/booking-stats/', booking_stats_by_station_and_route),
 ]
